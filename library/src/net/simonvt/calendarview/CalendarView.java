@@ -52,6 +52,7 @@ import android.widget.TextView;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -127,6 +128,8 @@ public class CalendarView extends FrameLayout {
      * String for parsing dates.
      */
     private static final String DATE_FORMAT = "MM/dd/yyyy";
+
+	private static final String MONTH_FORMAT = "MMMMMMMMM y";
 
     /**
      * The default minimal date.
@@ -250,6 +253,7 @@ public class CalendarView extends FrameLayout {
      * Which month should be displayed/highlighted [0-11].
      */
     private int mCurrentMonthDisplayed;
+	private int mCurrentMonthDisplayedYear;
 
     /**
      * Used for tracking during a scroll.
@@ -305,6 +309,8 @@ public class CalendarView extends FrameLayout {
      * Date format for parsing dates.
      */
     private final java.text.DateFormat mDateFormat = new SimpleDateFormat(DATE_FORMAT);
+
+	private final java.text.DateFormat mMonthFormat = new SimpleDateFormat(MONTH_FORMAT);
 
     /**
      * The current locale.
@@ -1257,13 +1263,12 @@ public class CalendarView extends FrameLayout {
      */
     private void setMonthDisplayed(Calendar calendar) {
         final int newMonthDisplayed = calendar.get(Calendar.MONTH);
-        if (mCurrentMonthDisplayed != newMonthDisplayed) {
+		final int newMonthDisplayedYear = calendar.get(Calendar.YEAR);
+        if (mCurrentMonthDisplayed != newMonthDisplayed || mCurrentMonthDisplayedYear != newMonthDisplayedYear) {
             mCurrentMonthDisplayed = newMonthDisplayed;
+			mCurrentMonthDisplayedYear = newMonthDisplayedYear;
             mAdapter.setFocusMonth(mCurrentMonthDisplayed);
-            final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY
-                    | DateUtils.FORMAT_SHOW_YEAR;
-            final long millis = calendar.getTimeInMillis();
-            String newMonthName = DateUtils.formatDateRange(getContext(), millis, millis, flags);
+            String newMonthName = mMonthFormat.format(new Date(calendar.getTimeInMillis()));
             mMonthName.setText(newMonthName);
             mMonthName.invalidate();
         }
