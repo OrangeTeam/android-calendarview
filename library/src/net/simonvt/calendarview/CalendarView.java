@@ -1827,13 +1827,17 @@ public class CalendarView extends FrameLayout {
             if (!mHasSelectedDay) {
                 return;
             }
-            mSelectedDateVerticalBar.setBounds(mSelectedLeft - mSelectedDateVerticalBarWidth / 2,
+            mSelectedDateVerticalBar.setBounds(
+					(int)(mSelectedLeft - mSelectedDateVerticalBarWidth / 2f + .5f),
                     mWeekSeperatorLineWidth,
-                    mSelectedLeft + mSelectedDateVerticalBarWidth / 2, mHeight);
+					(int)(mSelectedLeft + mSelectedDateVerticalBarWidth / 2f + .5f),
+					mHeight);
             mSelectedDateVerticalBar.draw(canvas);
-            mSelectedDateVerticalBar.setBounds(mSelectedRight - mSelectedDateVerticalBarWidth / 2,
+            mSelectedDateVerticalBar.setBounds(
+					(int)(mSelectedRight - mSelectedDateVerticalBarWidth / 2f + .5f),
                     mWeekSeperatorLineWidth,
-                    mSelectedRight + mSelectedDateVerticalBarWidth / 2, mHeight);
+					(int)(mSelectedRight + mSelectedDateVerticalBarWidth / 2f + .5f),
+					mHeight);
             mSelectedDateVerticalBar.draw(canvas);
         }
 
