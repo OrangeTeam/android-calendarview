@@ -1269,8 +1269,23 @@ public class CalendarView extends FrameLayout {
 			mCurrentMonthDisplayedYear = newMonthDisplayedYear;
             mAdapter.setFocusMonth(mCurrentMonthDisplayed);
             String newMonthName = mMonthFormat.format(new Date(calendar.getTimeInMillis()));
-            mMonthName.setText(newMonthName);
-            mMonthName.invalidate();
+            try {
+				// If the parse is successful (does not throw exception) the month name is invalid.
+				Integer.parseInt(newMonthName.substring(0, newMonthName.indexOf(" ")));
+
+				// Use date utils to display the month name, since the SimpleDateFormat is not yielding a valid name.
+				final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY
+						| DateUtils.FORMAT_SHOW_YEAR;
+				final long millis = calendar.getTimeInMillis();
+				newMonthName = DateUtils.formatDateRange(getContext(), millis, millis, flags);
+			}
+			catch (NumberFormatException e) {
+				// Proceed, month name is valid.
+			}
+
+			// Set month name.
+			mMonthName.setText(newMonthName);
+			mMonthName.invalidate();
         }
     }
 
