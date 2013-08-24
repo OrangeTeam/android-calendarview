@@ -53,6 +53,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -127,6 +128,8 @@ public class CalendarView extends FrameLayout {
     /**
      * String for parsing dates.
      */
+    private static final String DAY_FORMAT = "EEEEE";
+
     private static final String DATE_FORMAT = "MM/dd/yyyy";
 
 	private static final String MONTH_FORMAT = "MMMM y";
@@ -306,16 +309,18 @@ public class CalendarView extends FrameLayout {
     private Calendar mMaxDate;
 
     /**
-     * Date format for parsing dates.
-     */
-    private final java.text.DateFormat mDateFormat = new SimpleDateFormat(DATE_FORMAT);
-
-	private final java.text.DateFormat mMonthFormat = new SimpleDateFormat(MONTH_FORMAT);
-
-    /**
      * The current locale.
      */
     private Locale mCurrentLocale;
+
+	/**
+	 * Date format for parsing dates.
+	 */
+	private java.text.DateFormat mDayFormat;
+
+	private java.text.DateFormat mDateFormat;
+
+	private java.text.DateFormat mMonthFormat;
 
     /**
      * The callback used to indicate the user changes the date.
@@ -972,13 +977,19 @@ public class CalendarView extends FrameLayout {
      *
      * @param locale The current locale.
      */
-    private void setCurrentLocale(Locale locale) {
+    protected void setCurrentLocale(Locale locale) {
         if (locale.equals(mCurrentLocale)) {
             return;
         }
 
         mCurrentLocale = locale;
 
+	    // Update date formats.
+	    mDayFormat = new SimpleDateFormat(DAY_FORMAT, mCurrentLocale);
+	    mDateFormat = new SimpleDateFormat(DATE_FORMAT, mCurrentLocale);
+	    mMonthFormat = new SimpleDateFormat(MONTH_FORMAT, mCurrentLocale);
+
+	    // Update calendars.
         mTempDate = getCalendarForLocale(mTempDate, locale);
         mFirstDayOfMonth = getCalendarForLocale(mFirstDayOfMonth, locale);
         mMinDate = getCalendarForLocale(mMinDate, locale);
@@ -1041,10 +1052,10 @@ public class CalendarView extends FrameLayout {
      */
     private void setUpHeader() {
         mDayLabels = new String[mDaysPerWeek];
-        for (int i = mFirstDayOfWeek, count = mFirstDayOfWeek + mDaysPerWeek; i < count; i++) {
+	    for (int i = mFirstDayOfWeek, count = mFirstDayOfWeek + mDaysPerWeek; i < count; i++) {
             int calendarDay = (i > Calendar.SATURDAY) ? i - Calendar.SATURDAY : i;
-            mDayLabels[i - mFirstDayOfWeek] = DateUtils.getDayOfWeekString(calendarDay,
-                    DateUtils.LENGTH_SHORTEST);
+		    mTempDate.set(Calendar.DAY_OF_WEEK, calendarDay);
+            mDayLabels[i - mFirstDayOfWeek] = mDayFormat.format(mTempDate.getTime());
         }
 
         TextView label = (TextView) mDayNamesHeader.getChildAt(0);
@@ -1277,7 +1288,8 @@ public class CalendarView extends FrameLayout {
 				final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY
 						| DateUtils.FORMAT_SHOW_YEAR;
 				final long millis = calendar.getTimeInMillis();
-				newMonthName = DateUtils.formatDateRange(getContext(), millis, millis, flags);
+	            Formatter f = new Formatter(new StringBuilder(50), mCurrentLocale);
+				newMonthName = DateUtils.formatDateRange(getContext(), f, millis, millis, flags, null).toString();
 			}
 			catch (NumberFormatException e) {
 				// Proceed, month name is valid.
@@ -1600,7 +1612,7 @@ public class CalendarView extends FrameLayout {
             // If we're showing the week number calculate it based on Monday
             int i = 0;
             if (mShowWeekNumber) {
-                mDayNumbers[0] = String.format(Locale.getDefault(), "%d",
+                mDayNumbers[0] = String.format(mCurrentLocale, "%d",
                         mTempDate.get(Calendar.WEEK_OF_YEAR));
                 i++;
             }
@@ -1622,7 +1634,7 @@ public class CalendarView extends FrameLayout {
                 if (mTempDate.before(mMinDate) || mTempDate.after(mMaxDate)) {
                     mDayNumbers[i] = "";
                 } else {
-                    mDayNumbers[i] = String.format(Locale.getDefault(), "%d",
+                    mDayNumbers[i] = String.format(mCurrentLocale, "%d",
                             mTempDate.get(Calendar.DAY_OF_MONTH));
                 }
                 mTempDate.add(Calendar.DAY_OF_MONTH, 1);
