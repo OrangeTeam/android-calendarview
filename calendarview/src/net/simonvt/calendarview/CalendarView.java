@@ -1055,7 +1055,8 @@ public class CalendarView extends FrameLayout {
 	    for (int i = mFirstDayOfWeek, count = mFirstDayOfWeek + mDaysPerWeek; i < count; i++) {
             int calendarDay = (i > Calendar.SATURDAY) ? i - Calendar.SATURDAY : i;
 		    mTempDate.set(Calendar.DAY_OF_WEEK, calendarDay);
-            mDayLabels[i - mFirstDayOfWeek] = mDayFormat.format(mTempDate.getTime());
+		    String day = mDayFormat.format(mTempDate.getTime());
+            mDayLabels[i - mFirstDayOfWeek] = day.length() > 1 ? day.substring(0, 1) : day;
         }
 
         TextView label = (TextView) mDayNamesHeader.getChildAt(0);
