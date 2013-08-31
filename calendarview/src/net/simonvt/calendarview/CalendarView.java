@@ -1052,12 +1052,33 @@ public class CalendarView extends FrameLayout {
      */
     private void setUpHeader() {
         mDayLabels = new String[mDaysPerWeek];
+
+	    final boolean useDateUtils = Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2;
+	    final Locale defaultLocale = Locale.getDefault();
+
+	    if(useDateUtils) {
+		    // Backup and change the current default locale, to the one used by the calendar view.
+		    // We do this, because DateUtils makes use of the default locale.
+		    Locale.setDefault(mCurrentLocale);
+	    }
+
 	    for (int i = mFirstDayOfWeek, count = mFirstDayOfWeek + mDaysPerWeek; i < count; i++) {
             int calendarDay = (i > Calendar.SATURDAY) ? i - Calendar.SATURDAY : i;
-		    mTempDate.set(Calendar.DAY_OF_WEEK, calendarDay);
-		    String day = mDayFormat.format(mTempDate.getTime());
-            mDayLabels[i - mFirstDayOfWeek] = day.length() > 1 ? day.substring(0, 1) : day;
+		    int index = i - mFirstDayOfWeek;
+		    if(useDateUtils) {
+			    mDayLabels[index] = DateUtils.getDayOfWeekString(calendarDay, DateUtils.LENGTH_SHORTEST);
+		    }
+			else {
+			    // In Android 4.3 we should use the SimpleDateFormat.
+			    mTempDate.set(Calendar.DAY_OF_WEEK, calendarDay);
+			    mDayLabels[index] = mDayFormat.format(mTempDate.getTime());
+		    }
         }
+
+	    if(useDateUtils) {
+		    // Restore default locale.
+		    Locale.setDefault(defaultLocale);
+	    }
 
         TextView label = (TextView) mDayNamesHeader.getChildAt(0);
         if (mShowWeekNumber) {
