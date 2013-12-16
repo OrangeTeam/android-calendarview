@@ -89,7 +89,8 @@
         android:scaleType="fitXY"
         android:gravity="fill_horizontal" />
 
-    <ListView android:id="@android:id/list"
+    <net.simonvt.calendarview.TopSelectionListView
+			android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:drawSelectorOnTop="false"
