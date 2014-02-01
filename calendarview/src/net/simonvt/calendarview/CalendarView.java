@@ -1311,7 +1311,7 @@ public class CalendarView extends FrameLayout {
 						| DateUtils.FORMAT_SHOW_YEAR;
 				final long millis = calendar.getTimeInMillis();
 	            Formatter f = new Formatter(new StringBuilder(50), mCurrentLocale);
-				newMonthName = DateUtils.formatDateRange(getContext(), f, millis, millis, flags, null).toString();
+				newMonthName = DateUtils.formatDateRange(getContext(), f, millis, millis, flags).toString();
 			}
 			catch (NumberFormatException e) {
 				// Proceed, month name is valid.
