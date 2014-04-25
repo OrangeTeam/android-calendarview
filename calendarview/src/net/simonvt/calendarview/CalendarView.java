@@ -57,6 +57,8 @@ import java.util.Formatter;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import libore.icu.LocaleData;
+
 /**
  * This class is a calendar widget for displaying and selecting dates. The range
  * of dates supported by this calendar is configurable. A user can select a date
@@ -953,7 +955,7 @@ public class CalendarView extends FrameLayout {
     }
 
     private void updateDateTextSize() {
-        TypedArray dateTextAppearance = mContext.obtainStyledAttributes(
+        TypedArray dateTextAppearance = getContext().obtainStyledAttributes(
                 mDateTextAppearanceResId, R.styleable.TextAppearanceCompatStyleable);
         mDateTextSize = dateTextAppearance.getDimensionPixelSize(
                 R.styleable.TextAppearanceCompatStyleable_android_textSize, DEFAULT_DATE_TEXT_SIZE);
@@ -1069,7 +1071,7 @@ public class CalendarView extends FrameLayout {
         for (int i = 0; i < count - 1; i++) {
             label = (TextView) mDayNamesHeader.getChildAt(i + 1);
             if (mWeekDayTextAppearanceResId > -1) {
-                label.setTextAppearance(mContext, mWeekDayTextAppearanceResId);
+                label.setTextAppearance(getContext(), mWeekDayTextAppearanceResId);
             }
             if (i < mDaysPerWeek) {
                 label.setText(mDayLabels[i]);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.simonvt.calendarview;
+package libcore.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

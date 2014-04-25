@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package net.simonvt.calendarview;
+package libore.icu;
+
+import libcore.util.Objects;
 
 import java.text.DateFormat;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;;
 
