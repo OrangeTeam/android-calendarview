@@ -255,7 +255,7 @@ public class CalendarView extends FrameLayout {
     /**
      * Which month should be displayed/highlighted [0-11].
      */
-    private int mCurrentMonthDisplayed;
+    private int mCurrentMonthDisplayed = -1;
 	private int mCurrentMonthDisplayedYear;
 
     /**
@@ -891,7 +891,6 @@ public class CalendarView extends FrameLayout {
         }
         mFirstDayOfWeek = firstDayOfWeek;
         mAdapter.init();
-        mAdapter.notifyDataSetChanged();
         setUpHeader();
     }
 
@@ -954,7 +953,7 @@ public class CalendarView extends FrameLayout {
     }
 
     private void updateDateTextSize() {
-        TypedArray dateTextAppearance = getContext().obtainStyledAttributes(
+        TypedArray dateTextAppearance = mContext.obtainStyledAttributes(
                 mDateTextAppearanceResId, R.styleable.TextAppearanceCompatStyleable);
         mDateTextSize = dateTextAppearance.getDimensionPixelSize(
                 R.styleable.TextAppearanceCompatStyleable_android_textSize, DEFAULT_DATE_TEXT_SIZE);
@@ -1027,7 +1026,7 @@ public class CalendarView extends FrameLayout {
      */
     private void setUpAdapter() {
         if (mAdapter == null) {
-            mAdapter = new WeeksAdapter(getContext());
+            mAdapter = new WeeksAdapter();
             mAdapter.registerDataSetObserver(new DataSetObserver() {
                 @Override
                 public void onChanged() {
@@ -1398,7 +1397,7 @@ public class CalendarView extends FrameLayout {
 
         private int mSelectedWeek;
 
-        private GestureDetector mGestureDetector;
+        private final GestureDetector mGestureDetector;
 
         private int mFocusedMonth;
 
@@ -1406,7 +1405,7 @@ public class CalendarView extends FrameLayout {
 
         private int mTotalWeekCount;
 
-        public WeeksAdapter(Context context) {
+        public WeeksAdapter() {
             mGestureDetector = new GestureDetector(getContext(), new CalendarGestureListener());
             init();
         }
@@ -1421,6 +1420,7 @@ public class CalendarView extends FrameLayout {
                     || mMaxDate.get(Calendar.DAY_OF_WEEK) != mFirstDayOfWeek) {
                 mTotalWeekCount++;
             }
+            notifyDataSetChanged();
         }
 
         /**
