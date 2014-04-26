@@ -892,7 +892,7 @@ public class CalendarView extends FrameLayout {
                 mZerothWeek = (Calendar) mTempDate.clone();
             }
         }
-        invalidateAllWeekViews();
+        mAdapter.notifyDataSetChanged();
     }
     /**
      * Gets the first day of week.
