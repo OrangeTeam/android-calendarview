@@ -1350,16 +1350,17 @@ public class CalendarView extends FrameLayout {
     }
 
     /**
-     * calculate the number of weeks between {@code timeToBeCompared} and {@code baseTime}
-     * @param baseTime the base time
-     * @param timeToBeCompared the time should be calculated
-     * @return {@code (timeToBeCompared - baseTime.firstDayOfItsWeek) / MILLIS_IN_WEEK}
+     * calculate the number of weeks between {@code dateNeedCalculated} and {@code baseDate}
+     * @param baseDate the base date
+     * @param dateNeedCalculated the date need be calculated
+     * @return {@code (dateNeedCalculated - baseDate.firstDayOfItsWeek) / WEEK_LENGTH}
      * @see #adjustToFirstDayOfWeek
      */
-    private int getWeeksSince(long baseTime, long timeToBeCompared) {
-        mTempDate.setTimeInMillis(baseTime);
-        adjustToFirstDayOfWeek(mTempDate);
-        return (int) ((timeToBeCompared - mTempDate.getTimeInMillis()) / MILLIS_IN_WEEK);
+    private int getWeeksSince(long baseDate, long dateNeedCalculated) {
+        Calendar base = (Calendar) mTempDate.clone();
+        base.setTimeInMillis(baseDate);
+        adjustToFirstDayOfWeek(base);
+        return (int) ((dateNeedCalculated - base.getTimeInMillis()) / MILLIS_IN_WEEK);
     }
 
     /**
