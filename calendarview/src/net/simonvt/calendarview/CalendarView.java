@@ -309,6 +309,13 @@ public class CalendarView extends FrameLayout {
     private Calendar mMaxDate;
 
     /**
+     * The zeroth week.<br />
+     * Use it to calculate the week number, if not null;
+     * otherwise use Calendar.WEEK_OF_YEAR.
+     */
+    private Calendar mZerothWeek;
+
+    /**
      * The current locale.
      */
     private Locale mCurrentLocale;
@@ -851,6 +858,43 @@ public class CalendarView extends FrameLayout {
     }
 
     /**
+     * Gets the zeroth week.
+     *
+     * @return the week whose week number is zero.
+     */
+    public Long getZerothWeek() {
+        if (mZerothWeek != null) {
+            return mZerothWeek.getTimeInMillis();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Sets the zeroth week.<br />
+     * Use it to calculate the week number, if not null;
+     * otherwise use Calendar.WEEK_OF_YEAR.
+     *
+     * @param zerothWeek the week whose week number is zero.
+     */
+    public void setZerothWeek(Long zerothWeek) {
+        if (zerothWeek == null) {
+            if (mZerothWeek == null) {
+                return;
+            } else {
+                mZerothWeek = null;
+            }
+        } else {
+            mTempDate.setTimeInMillis(zerothWeek);
+            if (mZerothWeek != null && isSameWeek(mTempDate, mZerothWeek)) {
+                return;
+            } else {
+                mZerothWeek = (Calendar) mTempDate.clone();
+            }
+        }
+        invalidateAllWeekViews();
+    }
+    /**
      * Gets the first day of week.
      *
      * @return The first day of the week conforming to the {@link CalendarView}
@@ -991,6 +1035,7 @@ public class CalendarView extends FrameLayout {
         mFirstDayOfMonth = getCalendarForLocale(mFirstDayOfMonth, locale);
         mMinDate = getCalendarForLocale(mMinDate, locale);
         mMaxDate = getCalendarForLocale(mMaxDate, locale);
+        if(mZerothWeek != null) mZerothWeek = getCalendarForLocale(mZerothWeek, locale);
     }
 
     /**
@@ -1017,6 +1062,13 @@ public class CalendarView extends FrameLayout {
     private boolean isSameDate(Calendar firstDate, Calendar secondDate) {
         return (firstDate.get(Calendar.DAY_OF_YEAR) == secondDate.get(Calendar.DAY_OF_YEAR)
                 && firstDate.get(Calendar.YEAR) == secondDate.get(Calendar.YEAR));
+    }
+
+    /**
+     * @return True if the {@code firstWeek} is the same as the {@code secondWeek}.
+     */
+    private boolean isSameWeek(Calendar firstWeek, Calendar secondWeek) {
+        return getWeeksSinceMinDate(firstWeek) == getWeeksSinceMinDate(secondWeek);
     }
 
     /**
@@ -1335,6 +1387,31 @@ public class CalendarView extends FrameLayout {
                 | DateUtils.FORMAT_SHOW_YEAR;
         Formatter f = new Formatter(new StringBuilder(50), mCurrentLocale);
         return DateUtils.formatDateRange(getContext(), f, timeInMillis, timeInMillis, flags).toString();
+    }
+
+    /**
+     * Gets the week number of {@code week}.
+     * @return the week number of {@code week}
+     */
+    protected int getWeekNumber(Calendar week) {
+        if (mZerothWeek == null) {
+            return week.get(Calendar.WEEK_OF_YEAR);
+        } else {
+            return getWeeksSince(mZerothWeek.getTimeInMillis(), week.getTimeInMillis());
+        }
+    }
+
+    /**
+     * Gets the formatted week number of {@code week}.
+     * @return the week number of {@code week}
+     */
+    protected String getWeekNumberString(Calendar week) {
+        final int weekNumber = getWeekNumber(week);
+        if (weekNumber >= 0) {
+            return String.format(mCurrentLocale, "%d", weekNumber);
+        } else {
+            return "";
+        }
     }
 
     /**
@@ -1686,8 +1763,7 @@ public class CalendarView extends FrameLayout {
             // If we're showing the week number calculate it based on Monday
             int i = 0;
             if (mShowWeekNumber) {
-                mDayNumbers[0] = String.format(mCurrentLocale, "%d",
-                        mTempDate.get(Calendar.WEEK_OF_YEAR));
+                mDayNumbers[0] = getWeekNumberString(mTempDate);
                 i++;
             }
 
