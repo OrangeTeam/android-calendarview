@@ -953,7 +953,7 @@ public class CalendarView extends FrameLayout {
     }
 
     private void updateDateTextSize() {
-        TypedArray dateTextAppearance = mContext.obtainStyledAttributes(
+        TypedArray dateTextAppearance = getContext().obtainStyledAttributes(
                 mDateTextAppearanceResId, R.styleable.TextAppearanceCompatStyleable);
         mDateTextSize = dateTextAppearance.getDimensionPixelSize(
                 R.styleable.TextAppearanceCompatStyleable_android_textSize, DEFAULT_DATE_TEXT_SIZE);
@@ -1050,6 +1050,7 @@ public class CalendarView extends FrameLayout {
      * Sets up the strings to be used by the header.
      */
     private void setUpHeader() {
+        // getDayLabels
         mDayLabels = new String[mDaysPerWeek];
 
 	    final boolean useDateUtils = Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2;
@@ -1078,20 +1079,22 @@ public class CalendarView extends FrameLayout {
 		    // Restore default locale.
 		    Locale.setDefault(defaultLocale);
 	    }
-
+        // Deal with week number
         TextView label = (TextView) mDayNamesHeader.getChildAt(0);
         if (mShowWeekNumber) {
             label.setVisibility(View.VISIBLE);
         } else {
             label.setVisibility(View.GONE);
         }
-        for (int i = 1, count = mDayNamesHeader.getChildCount(); i < count; i++) {
-            label = (TextView) mDayNamesHeader.getChildAt(i);
+        // Deal with day labels
+        final int count = mDayNamesHeader.getChildCount();
+        for (int i = 0; i < count - 1; i++) {
+            label = (TextView) mDayNamesHeader.getChildAt(i + 1);
             if (mWeekDayTextAppearanceResId > -1) {
                 label.setTextAppearance(getContext(), mWeekDayTextAppearanceResId);
             }
-            if (i < mDaysPerWeek + 1) {
-                label.setText(mDayLabels[i - 1]);
+            if (i < mDaysPerWeek) {
+                label.setText(mDayLabels[i]);
                 label.setVisibility(View.VISIBLE);
             } else {
                 label.setVisibility(View.GONE);
