@@ -1361,12 +1361,14 @@ public class CalendarView extends FrameLayout {
         adjustToFirstDayOfWeek(mTempDate);
         return (int) ((timeToBeCompared - mTempDate.getTimeInMillis()) / MILLIS_IN_WEEK);
     }
+
     /**
      * adjust the date to the first day of its week
      * based on {@link #mFirstDayOfWeek} and {@link #DAYS_PER_WEEK}
      * @param date the date to be adjusted
      */
     private void adjustToFirstDayOfWeek(Calendar date) {
+        standardizeDate(date);
         //    date -= date.dayOfWeek - mFirstDayOfWeek (delta >= 0)
         // => date += mFirstDayOfWeek - date.dayOfWeek (+= -delta)
         int diff = mFirstDayOfWeek - date.get(Calendar.DAY_OF_WEEK); // diff is -delta
@@ -1376,6 +1378,17 @@ public class CalendarView extends FrameLayout {
             diff -= DAYS_PER_WEEK;
         }
         date.add(Calendar.DAY_OF_MONTH, diff);
+    }
+
+    /**
+     * set {@code date}'s hour, minute, second and millisecond to zero.
+     * @param date date to be standardized
+     */
+    private static void standardizeDate(Calendar date) {
+        date.set(Calendar.HOUR_OF_DAY, 0);
+        date.set(Calendar.MINUTE, 0);
+        date.set(Calendar.SECOND, 0);
+        date.set(Calendar.MILLISECOND, 0);
     }
 
     /**
