@@ -6,6 +6,7 @@
 
     <style name="Widget.CalendarView">
         <item name="cv_showWeekNumber">true</item>
+        <item name="cv_firstDayOfWeek">1</item>
         <item name="cv_minDate">01/01/1900</item>
         <item name="cv_maxDate">12/31/2100</item>
         <item name="cv_shownWeekCount">6</item>

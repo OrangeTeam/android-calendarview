@@ -1050,29 +1050,48 @@ public class CalendarView extends FrameLayout {
      * Sets up the strings to be used by the header.
      */
     private void setUpHeader() {
-        final String[] tinyWeekdayNames = LocaleData.get(mCurrentLocale).tinyWeekdayNames;
         mDayLabels = new String[mDaysPerWeek];
-        for (int i = 0; i < mDaysPerWeek; i++) {
-            final int j = i + mFirstDayOfWeek;
-            final int calendarDay = (j > Calendar.SATURDAY) ? j - Calendar.SATURDAY : j;
-            mDayLabels[i] = tinyWeekdayNames[calendarDay];
+
+	    final boolean useDateUtils = Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2;
+	    final Locale defaultLocale = Locale.getDefault();
+
+	    if(useDateUtils) {
+		    // Backup and change the current default locale, to the one used by the calendar view.
+		    // We do this, because DateUtils makes use of the default locale.
+		    Locale.setDefault(mCurrentLocale);
+	    }
+
+	    for (int i = mFirstDayOfWeek, count = mFirstDayOfWeek + mDaysPerWeek; i < count; i++) {
+            int calendarDay = (i > Calendar.SATURDAY) ? i - Calendar.SATURDAY : i;
+		    int index = i - mFirstDayOfWeek;
+		    if(useDateUtils) {
+			    mDayLabels[index] = DateUtils.getDayOfWeekString(calendarDay, DateUtils.LENGTH_SHORTEST);
+		    }
+			else {
+			    // In Android 4.3 we should use the SimpleDateFormat.
+			    mTempDate.set(Calendar.DAY_OF_WEEK, calendarDay);
+			    mDayLabels[index] = mDayFormat.format(mTempDate.getTime());
+		    }
         }
-        // Deal with week number
+
+	    if(useDateUtils) {
+		    // Restore default locale.
+		    Locale.setDefault(defaultLocale);
+	    }
+
         TextView label = (TextView) mDayNamesHeader.getChildAt(0);
         if (mShowWeekNumber) {
             label.setVisibility(View.VISIBLE);
         } else {
             label.setVisibility(View.GONE);
         }
-        // Deal with day labels
-        final int count = mDayNamesHeader.getChildCount();
-        for (int i = 0; i < count - 1; i++) {
-            label = (TextView) mDayNamesHeader.getChildAt(i + 1);
+        for (int i = 1, count = mDayNamesHeader.getChildCount(); i < count; i++) {
+            label = (TextView) mDayNamesHeader.getChildAt(i);
             if (mWeekDayTextAppearanceResId > -1) {
-                label.setTextAppearance(mContext, mWeekDayTextAppearanceResId);
+                label.setTextAppearance(getContext(), mWeekDayTextAppearanceResId);
             }
-            if (i < mDaysPerWeek) {
-                label.setText(mDayLabels[i]);
+            if (i < mDaysPerWeek + 1) {
+                label.setText(mDayLabels[i - 1]);
                 label.setVisibility(View.VISIBLE);
             } else {
                 label.setVisibility(View.GONE);
