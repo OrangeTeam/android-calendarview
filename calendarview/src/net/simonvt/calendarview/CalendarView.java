@@ -16,6 +16,7 @@
 
 package net.simonvt.calendarview;
 
+import android.annotation.TargetApi;
 import android.app.Service;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -132,7 +133,7 @@ public class CalendarView extends FrameLayout {
 
     private static final String DATE_FORMAT = "MM/dd/yyyy";
 
-	private static final String MONTH_FORMAT = "MMMM y";
+    private static final String MONTH_FORMAT = "M y";
 
     /**
      * The default minimal date.
@@ -256,7 +257,6 @@ public class CalendarView extends FrameLayout {
      * Which month should be displayed/highlighted [0-11].
      */
     private int mCurrentMonthDisplayed = -1;
-	private int mCurrentMonthDisplayedYear;
 
     /**
      * Used for tracking during a scroll.
@@ -320,7 +320,6 @@ public class CalendarView extends FrameLayout {
 
 	private java.text.DateFormat mDateFormat;
 
-	private java.text.DateFormat mMonthFormat;
 
     /**
      * The callback used to indicate the user changes the date.
@@ -986,7 +985,6 @@ public class CalendarView extends FrameLayout {
 	    // Update date formats.
 	    mDayFormat = new SimpleDateFormat(DAY_FORMAT, mCurrentLocale);
 	    mDateFormat = new SimpleDateFormat(DATE_FORMAT, mCurrentLocale);
-	    mMonthFormat = new SimpleDateFormat(MONTH_FORMAT, mCurrentLocale);
 
 	    // Update calendars.
         mTempDate = getCalendarForLocale(mTempDate, locale);
@@ -1297,30 +1295,46 @@ public class CalendarView extends FrameLayout {
      * @param calendar A day in the new focus month.
      */
     private void setMonthDisplayed(Calendar calendar) {
-        mCurrentMonthDisplayedYear = calendar.get(Calendar.YEAR);
-
         mCurrentMonthDisplayed = calendar.get(Calendar.MONTH);
         mAdapter.setFocusMonth(mCurrentMonthDisplayed);
-        String newMonthName = mMonthFormat.format(new Date(calendar.getTimeInMillis()));
-
-        try {
-            // If the parse is successful (does not throw exception) the month name is invalid.
-            Integer.parseInt(newMonthName.substring(0, newMonthName.indexOf(" ")));
-
-            // Use date utils to display the month name, since the SimpleDateFormat is not yielding a valid name.
-            final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY
-                    | DateUtils.FORMAT_SHOW_YEAR;
-            final long millis = calendar.getTimeInMillis();
-            Formatter f = new Formatter(new StringBuilder(50), mCurrentLocale);
-            newMonthName = DateUtils.formatDateRange(getContext(), f, millis, millis, flags).toString();
-        }
-        catch (NumberFormatException e) {
-            // Proceed, month name is valid.
-        }
-
+        String newMonthName = getMonthName(calendar.getTimeInMillis());
         // Set month name.
         mMonthName.setText(newMonthName);
         mMonthName.invalidate();
+    }
+
+    private String getMonthName(final long timeInMillis) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            return getMonthNameNew(timeInMillis);
+        } else {
+            return getMonthNameOld(timeInMillis);
+        }
+
+    }
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    private String getMonthNameNew(final long timeInMillis) {
+        final java.text.DateFormat monthFormat = new SimpleDateFormat(
+                android.text.format.DateFormat.getBestDateTimePattern(mCurrentLocale, MONTH_FORMAT),
+                mCurrentLocale);
+        String monthName = monthFormat.format(new Date(timeInMillis));
+        if(monthName.matches("[\\d ]")) { // If only numbers, the month name is invalid.
+            // use old method, since the SimpleDateFormat is not yielding a valid name.
+            monthName = getMonthNameOld(timeInMillis);
+        }
+        return monthName;
+    }
+
+    /**
+     * Use date utils to get the month name
+     * cons see commit cc59f3b48bef6a1a831888befd429302bd10ab5f
+     * @param timeInMillis timestamp
+     * @return
+     */
+    private String getMonthNameOld(final long timeInMillis) {
+        final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NO_MONTH_DAY
+                | DateUtils.FORMAT_SHOW_YEAR;
+        Formatter f = new Formatter(new StringBuilder(50), mCurrentLocale);
+        return DateUtils.formatDateRange(getContext(), f, timeInMillis, timeInMillis, flags).toString();
     }
 
     /**
