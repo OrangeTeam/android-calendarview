@@ -1346,13 +1346,36 @@ public class CalendarView extends FrameLayout {
             throw new IllegalArgumentException("fromDate: " + mMinDate.getTime()
                     + " does not precede toDate: " + date.getTime());
         }
-        long endTimeMillis = date.getTimeInMillis()
-                + date.getTimeZone().getOffset(date.getTimeInMillis());
-        long startTimeMillis = mMinDate.getTimeInMillis()
-                + mMinDate.getTimeZone().getOffset(mMinDate.getTimeInMillis());
-        long dayOffsetMillis = (mMinDate.get(Calendar.DAY_OF_WEEK) - mFirstDayOfWeek)
-                * MILLIS_IN_DAY;
-        return (int) ((endTimeMillis - startTimeMillis + dayOffsetMillis) / MILLIS_IN_WEEK);
+        return getWeeksSince(mMinDate.getTimeInMillis(), date.getTimeInMillis());
+    }
+
+    /**
+     * calculate the number of weeks between {@code timeToBeCompared} and {@code baseTime}
+     * @param baseTime the base time
+     * @param timeToBeCompared the time should be calculated
+     * @return {@code (timeToBeCompared - baseTime.firstDayOfItsWeek) / MILLIS_IN_WEEK}
+     * @see #adjustToFirstDayOfWeek
+     */
+    private int getWeeksSince(long baseTime, long timeToBeCompared) {
+        mTempDate.setTimeInMillis(baseTime);
+        adjustToFirstDayOfWeek(mTempDate);
+        return (int) ((timeToBeCompared - mTempDate.getTimeInMillis()) / MILLIS_IN_WEEK);
+    }
+    /**
+     * adjust the date to the first day of its week
+     * based on {@link #mFirstDayOfWeek} and {@link #DAYS_PER_WEEK}
+     * @param date the date to be adjusted
+     */
+    private void adjustToFirstDayOfWeek(Calendar date) {
+        //    date -= date.dayOfWeek - mFirstDayOfWeek (delta >= 0)
+        // => date += mFirstDayOfWeek - date.dayOfWeek (+= -delta)
+        int diff = mFirstDayOfWeek - date.get(Calendar.DAY_OF_WEEK); // diff is -delta
+        if(diff > 0) { // but if date.dayOfWeek < mFirstDayOfWeek(delta < 0)
+            //    date -= delta + DAYS_PER_WEEK
+            // => date += -delta - DAYS_PER_WEEK
+            diff -= DAYS_PER_WEEK;
+        }
+        date.add(Calendar.DAY_OF_MONTH, diff);
     }
 
     /**
@@ -1655,8 +1678,7 @@ public class CalendarView extends FrameLayout {
             }
 
             // Now adjust our starting day based on the start day of the week
-            int diff = mFirstDayOfWeek - mTempDate.get(Calendar.DAY_OF_WEEK);
-            mTempDate.add(Calendar.DAY_OF_MONTH, diff);
+            adjustToFirstDayOfWeek(mTempDate);
 
             mFirstDay = (Calendar) mTempDate.clone();
             mMonthOfFirstWeekDay = mTempDate.get(Calendar.MONTH);
