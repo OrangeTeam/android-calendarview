@@ -133,7 +133,7 @@ public class CalendarView extends FrameLayout {
 
     private static final String DATE_FORMAT = "MM/dd/yyyy";
 
-    private static final String MONTH_FORMAT = "M y";
+    private static final String MONTH_FORMAT = "MMMM y";
 
     /**
      * The default minimal date.
